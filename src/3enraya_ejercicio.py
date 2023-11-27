@@ -9,11 +9,10 @@ FICHAS = (' ', 'X', 'O')
 # Una tupla que contendrá 3 tuplas (filas), cada una tendrá 3 conjuntos (columnas), 
 # donde cada elemento de un conjunto es una posición accesible en forma de tupla (fila, columna)
 POSICIONES_PERMITIDAS = (
-    (set(()),set(()),set(())),
-    (set(()),set(()),set(())),
-    (set(()),set(()),set(()))
+    ({(0,0),(0,1),(1,0),(1,1)},{(0,1),(0,0),(0,2),(1,1)},{(0,2),(0,1),(1,2),(1,1)}),
+    ({(1,0),(0,0),(2,0),(1,1)},{(1,2),(0,2),(2,2),(1,1)}),
+    ({(2,0),(1,0),(2,1),(1,1)},{(2,1),(2,0),(2,2),(1,1)},{(2,2),(2,1),(1,2),(1,1)})
     )
-
 
 def borrarConsola():
     """ Limpiar la consola."""
@@ -86,11 +85,11 @@ def verificar_ganador(tablero) -> tuple:
 
     # TODO: Verificar diagonales
     # Igual en las diagonales...
-    for posicion in range(len(tablero)):
-        if tablero[0][0] == 1 and tablero[1][1] == 1 and tablero[2][2] == 1 or tablero[0][2] == 1 and tablero[1][1] == 1 and tablero[2][0] == 1:
-            return '1', True
-        if tablero[0][0] == 2 and tablero[1][1] == 2 and tablero[2][2] == 2 or tablero[0][2] == 2 and tablero[1][1] == 2 and tablero[2][0] == 2:
-            return '2', True
+    
+    if tablero[0][0] == 1 and tablero[1][1] == 1 and tablero[2][2] == 1 or tablero[0][2] == 1 and tablero[1][1] == 1 and tablero[2][0] == 1:
+        return '1', True
+    if tablero[0][0] == 2 and tablero[1][1] == 2 and tablero[2][2] == 2 or tablero[0][2] == 2 and tablero[1][1] == 2 and tablero[2][0] == 2:
+        return '2', True
         
     # Si no retorno nada, quiere decir que aún no ganó nadie...
     return None, False
@@ -136,6 +135,15 @@ def comprobar_casilla(tablero: tuple, jugador: int, ronda: int, pos_ficha: list,
             return True
         else:
             return False
+    
+    if ronda > 3 and jugador == ronda:
+        if not pos_ficha_a_mover:
+            return tablero[pos_ficha['fila']][pos_ficha['columna']] == jugador
+        else:
+            posicionesPermitidas = POSICIONES_PERMITIDAS[pos_ficha_a_mover['fila']][pos_ficha_a_mover['columna']]
+            nuevaPosicion = tuple((pos_ficha['fila'], pos_ficha['columna']))
+            return nuevaPosicion in posicionesPermitidas and tablero[nuevaPosicion[0]][nuevaPosicion[1]] == 0
+    return False
     
 
 
@@ -210,7 +218,7 @@ def jugar(tablero: tuple):
         colocar_ficha(tablero, turno, ronda)
         mostrar_tablero(tablero)
 
-        hay_ganador = verificar_ganador(tablero)
+        ganador, hay_ganador = verificar_ganador(tablero)
         if hay_ganador:
             print(f"\n¡El jugador {ganador} ha ganado!\n")
 
